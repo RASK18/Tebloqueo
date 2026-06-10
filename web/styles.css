@@ -1,0 +1,78 @@
+:root {
+  color-scheme: light;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  background: #f4f6f8;
+  color: #17202a;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background:
+    radial-gradient(circle at top left, rgba(30, 145, 76, 0.12), transparent 40%),
+    radial-gradient(circle at bottom right, rgba(196, 36, 36, 0.1), transparent 42%),
+    #f4f6f8;
+}
+
+.card {
+  width: min(100%, 520px);
+  padding: 56px 40px;
+  border: 1px solid #dfe5eb;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 24px 70px rgba(23, 32, 42, 0.1);
+  text-align: center;
+}
+
+.status {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 28px;
+  border-radius: 16px;
+  background: #5c6370;
+  color: #fff;
+  font-size: 38px;
+  font-weight: 800;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  color: #66717d;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(42px, 8vw, 64px);
+  letter-spacing: -0.055em;
+}
+
+.description {
+  max-width: 380px;
+  margin: 20px auto 30px;
+  color: #59636e;
+  font-size: 18px;
+  line-height: 1.55;
+}
+
+.placeholder {
+  display: inline-block;
+  padding: 12px 18px;
+  border-radius: 999px;
+  background: #edf0f3;
+  color: #737d87;
+  font-size: 14px;
+  font-weight: 650;
+}

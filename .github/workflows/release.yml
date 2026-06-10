@@ -1,0 +1,69 @@
+name: Release Windows app
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-main
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: windows-latest
+    env:
+      VERSION: 1.0.${{ github.run_number }}
+      GH_TOKEN: ${{ github.token }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore
+        run: dotnet restore Tebloqueo.slnx
+
+      - name: Test
+        run: dotnet test Tebloqueo.slnx --configuration Release --no-restore
+
+      - name: Publish single-file executable
+        shell: pwsh
+        run: >
+          dotnet publish src/Tebloqueo/Tebloqueo.csproj
+          --configuration Release
+          --no-restore
+          --output publish
+          -p:Version=$env:VERSION
+          -p:DebugType=None
+          -p:DebugSymbols=false
+
+      - name: Create update manifest
+        shell: pwsh
+        run: |
+          $executable = Join-Path $PWD "publish/Tebloqueo.exe"
+          $hash = (Get-FileHash $executable -Algorithm SHA256).Hash
+          $manifest = @{
+            version = $env:VERSION
+            assetUrl = "https://github.com/${{ github.repository }}/releases/download/v$env:VERSION/Tebloqueo.exe"
+            sha256 = $hash
+          }
+          $manifest | ConvertTo-Json | Set-Content "publish/update.json" -Encoding utf8
+
+      - name: Create or update GitHub release
+        shell: pwsh
+        run: |
+          $tag = "v$env:VERSION"
+          if (gh release view $tag 2>$null) {
+            gh release upload $tag "publish/Tebloqueo.exe" "publish/update.json" --clobber
+          } else {
+            gh release create $tag "publish/Tebloqueo.exe" "publish/update.json" --title "Tebloqueo $tag" --generate-notes --latest
+          }

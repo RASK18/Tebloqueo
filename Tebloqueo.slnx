@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Tebloqueo/Tebloqueo.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Tebloqueo.Tests/Tebloqueo.Tests.csproj" />
+  </Folder>
+</Solution>
