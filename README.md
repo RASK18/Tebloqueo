@@ -12,12 +12,15 @@ Descarga `Tebloqueo.exe` desde la [última release](https://github.com/RASK18/Te
 
 La aplicación busca una actualización al arrancar. Cuando existe una versión más reciente, verifica su SHA-256, sustituye el ejecutable y se reinicia automáticamente.
 
+Si el inicio con Windows está activado y el usuario mueve el EXE, la ruta de autoarranque se repara automáticamente la próxima vez que abra Tebloqueo manualmente.
+
 ## Desarrollo
 
 Requisitos:
 
 - Windows x64
 - .NET SDK 10
+- Node.js 24 para desarrollar la web
 
 Comandos principales:
 
@@ -28,11 +31,20 @@ dotnet run --project src/Tebloqueo/Tebloqueo.csproj
 dotnet publish src/Tebloqueo/Tebloqueo.csproj -c Release -o publish
 ```
 
+Comandos de la web:
+
+```powershell
+cd web
+npm ci
+npm test
+npm run build
+```
+
 ## Organización
 
 - `src/Tebloqueo`: aplicación WinForms y autoactualizador.
 - `tests/Tebloqueo.Tests`: pruebas automatizadas.
-- `web`: placeholder de la futura web de descarga.
+- `web`: landing estática vanilla y build reproducible para GitHub Pages.
 - `.github/workflows/app.yml`: valida ramas y pull requests; en `main`, versiona y publica el EXE.
 - `.github/workflows/pages.yml`: despliega los cambios de `web` en GitHub Pages.
 

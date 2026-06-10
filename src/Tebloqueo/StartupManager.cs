@@ -10,8 +10,25 @@ internal sealed class StartupManager
     public bool IsEnabled()
     {
         using var key = Registry.CurrentUser.OpenSubKey(RunKeyPath, false);
-        return key?.GetValue(ValueName) is string value &&
-               value.Contains(Environment.ProcessPath ?? string.Empty, StringComparison.OrdinalIgnoreCase);
+        return key?.GetValue(ValueName) is string value && !string.IsNullOrWhiteSpace(value);
+    }
+
+    public bool RepairPathIfEnabled()
+    {
+        using var key = Registry.CurrentUser.OpenSubKey(RunKeyPath, true);
+        if (key?.GetValue(ValueName) is not string existingValue || string.IsNullOrWhiteSpace(existingValue))
+        {
+            return false;
+        }
+
+        var currentPath = GetCurrentPath();
+        if (!NeedsPathRepair(existingValue, currentPath))
+        {
+            return false;
+        }
+
+        key.SetValue(ValueName, FormatCommand(currentPath));
+        return true;
     }
 
     public void SetEnabled(bool enabled)
@@ -21,11 +38,20 @@ internal sealed class StartupManager
 
         if (enabled)
         {
-            key.SetValue(ValueName, $"\"{Environment.ProcessPath}\"");
+            key.SetValue(ValueName, FormatCommand(GetCurrentPath()));
         }
         else
         {
             key.DeleteValue(ValueName, false);
         }
     }
+
+    internal static bool NeedsPathRepair(string existingValue, string currentPath) =>
+        !string.Equals(existingValue.Trim(), FormatCommand(currentPath), StringComparison.OrdinalIgnoreCase);
+
+    internal static string FormatCommand(string executablePath) => $"\"{executablePath}\"";
+
+    private static string GetCurrentPath() =>
+        Environment.ProcessPath
+        ?? throw new InvalidOperationException("No se pudo determinar la ruta actual de Tebloqueo.");
 }

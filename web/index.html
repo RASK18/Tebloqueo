@@ -3,17 +3,112 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Tebloqueo, información clara desde la bandeja de Windows.">
-  <title>Tebloqueo</title>
+  <meta name="description" content="Tebloqueo te avisa cuando los bloqueos de LaLiga pueden dejar webs inaccesibles.">
+  <meta name="theme-color" content="#0b0f14">
+  <title>Tebloqueo | Cuando hay fútbol, internet paga</title>
+  <link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css">
   <link rel="stylesheet" href="styles.css">
+  <script type="module" src="app.js"></script>
 </head>
 <body>
-  <main class="card">
-    <span class="status" aria-hidden="true">?</span>
-    <p class="eyebrow">Aplicación para Windows</p>
-    <h1>Tebloqueo</h1>
-    <p class="description">Muy pronto podrás descargar desde aquí la versión más reciente.</p>
-    <span class="placeholder">Descarga próximamente</span>
+  <a class="skip-link" href="#contenido">Saltar al contenido</a>
+
+  <header class="site-header">
+    <div class="shell brand">
+      <div class="asset-placeholder logo-placeholder" aria-label="Placeholder para el logotipo final">
+        <i class="bi bi-image" aria-hidden="true"></i>
+        <span>Logo</span>
+      </div>
+      <div>
+        <p class="brand-name">Teblo<span>queo</span></p>
+        <p class="brand-tagline">Si se cae media internet, que no te pille por sorpresa.</p>
+      </div>
+    </div>
+  </header>
+
+  <main id="contenido">
+    <section class="hero shell" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <p class="eyebrow"><i class="bi bi-broadcast-pin" aria-hidden="true"></i> Avisos claros desde Windows</p>
+        <h1 id="hero-title">Cuando hay fútbol,<br>LaLiga bloquea.<br><span>Internet paga.</span></h1>
+        <div class="hero-description">
+          <p>Tebloqueo te avisa cuando los bloqueos de LaLiga pueden dejar webs inaccesibles desde los principales ISP españoles.</p>
+          <p>Si una página falla, quizá no seas tú; puede ser el momento de activar la VPN.</p>
+        </div>
+
+        <div class="actions">
+          <a
+            class="button button-primary"
+            id="download-button"
+            href="https://github.com/RASK18/Tebloqueo/releases/latest/download/Tebloqueo.exe"
+          >
+            <i class="bi bi-download" aria-hidden="true"></i>
+            <span>Descargar Tebloqueo</span>
+          </a>
+          <a class="button button-secondary" href="https://github.com/RASK18/Tebloqueo">
+            <i class="bi bi-github" aria-hidden="true"></i>
+            <span>Ver código en GitHub</span>
+          </a>
+        </div>
+
+        <p class="release-status" id="release-status" aria-live="polite">
+          <i class="bi bi-arrow-repeat" aria-hidden="true"></i>
+          <span>Comprobando la última versión…</span>
+        </p>
+
+        <ul class="tags" aria-label="Características de distribución">
+          <li><i class="bi bi-windows" aria-hidden="true"></i> Windows x64</li>
+          <li><i class="bi bi-usb-drive" aria-hidden="true"></i> Portable</li>
+          <li><i class="bi bi-check-circle" aria-hidden="true"></i> Sin instalación</li>
+          <li><i class="bi bi-code-slash" aria-hidden="true"></i> Open Source</li>
+          <li><i class="bi bi-arrow-repeat" aria-hidden="true"></i> Autoactualizable</li>
+        </ul>
+      </div>
+
+      <div class="hero-visual">
+        <div class="asset-placeholder illustration-placeholder" aria-label="Placeholder para la ilustración principal final">
+          <div class="placeholder-icon"><i class="bi bi-image" aria-hidden="true"></i></div>
+          <strong>Ilustración principal</strong>
+          <span>Recurso final pendiente</span>
+          <small>Área preparada para sustituir por el arte definitivo</small>
+        </div>
+      </div>
+    </section>
+
+    <section class="features shell" aria-label="Qué hace Tebloqueo">
+      <article class="feature">
+        <i class="bi bi-bell-fill feature-icon" aria-hidden="true"></i>
+        <div>
+          <h2>Te avisa</h2>
+          <p>Detecta cuándo hay bloqueos de LaLiga que pueden dejar webs inaccesibles desde tu operador de internet.</p>
+        </div>
+      </article>
+      <article class="feature">
+        <i class="bi bi-globe2 feature-icon" aria-hidden="true"></i>
+        <div>
+          <h2>Explica el problema</h2>
+          <p>Te indica que los fallos pueden deberse a los bloqueos de LaLiga y no a tu conexión o al sitio web.</p>
+        </div>
+      </article>
+      <article class="feature">
+        <i class="bi bi-shield-lock-fill feature-icon" aria-hidden="true"></i>
+        <div>
+          <h2>Te recuerda activar la VPN</h2>
+          <p>Si hay bloqueo, te recuerda que activar la VPN puede ser la solución para recuperar el acceso a internet.</p>
+        </div>
+      </article>
+    </section>
+
+    <aside class="notice shell">
+      <i class="bi bi-exclamation-triangle notice-icon" aria-hidden="true"></i>
+      <p><strong>Los bloqueos de LaLiga no son errores técnicos: son decisiones deliberadas.</strong><br>Afectan a miles de webs ajenas al fútbol y perjudican a usuarios, empresas y a toda la red.</p>
+    </aside>
   </main>
+
+  <footer class="site-footer shell">
+    <span>Tebloqueo es software libre.</span>
+    <a href="https://github.com/RASK18/Tebloqueo/blob/main/LICENSE.md">Licencia AGPL-3.0</a>
+    <span>Iconos: Bootstrap Icons, licencia MIT.</span>
+  </footer>
 </body>
 </html>

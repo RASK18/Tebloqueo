@@ -20,6 +20,7 @@ internal sealed class TrayApplicationContext : ApplicationContext
     private readonly Icon _noIcon = IconFactory.Create("NO", Color.FromArgb(30, 145, 76));
     private readonly Icon _unknownIcon = IconFactory.Create("?", Color.FromArgb(92, 99, 112));
     private readonly string? _launchUpdateError;
+    private readonly string? _startupRepairError;
     private bool _isRefreshing;
     private bool _hasCompletedFirstCheck;
     private BlockingState _currentState = BlockingState.Unknown;
@@ -31,6 +32,7 @@ internal sealed class TrayApplicationContext : ApplicationContext
         _httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(15) };
         _statusClient = new StatusClient(_httpClient);
         _updateService = new UpdateService(_httpClient, GetCurrentVersion());
+        _startupRepairError = RepairStartupPath();
 
         var versionItem = new ToolStripMenuItem($"Versión: {GetCurrentVersion().ToString(3)}") { Enabled = false };
         _refreshItem = new ToolStripMenuItem("Comprobar ahora");
@@ -83,6 +85,11 @@ internal sealed class TrayApplicationContext : ApplicationContext
         if (!string.IsNullOrWhiteSpace(_launchUpdateError))
         {
             ShowBalloon("Actualización no aplicada", Shorten(_launchUpdateError, 180), ToolTipIcon.Warning);
+        }
+
+        if (!string.IsNullOrWhiteSpace(_startupRepairError))
+        {
+            ShowBalloon("No se pudo reparar el inicio con Windows", Shorten(_startupRepairError, 180), ToolTipIcon.Warning);
         }
 
         var updateResult = await _updateService.CheckAndDownloadAsync();
@@ -227,6 +234,19 @@ internal sealed class TrayApplicationContext : ApplicationContext
         catch
         {
             return false;
+        }
+    }
+
+    private string? RepairStartupPath()
+    {
+        try
+        {
+            _startupManager.RepairPathIfEnabled();
+            return null;
+        }
+        catch (Exception exception)
+        {
+            return exception.Message;
         }
     }
 
