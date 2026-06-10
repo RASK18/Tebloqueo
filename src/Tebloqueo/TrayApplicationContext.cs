@@ -12,8 +12,7 @@ internal sealed class TrayApplicationContext : ApplicationContext
     private readonly UpdateService _updateService;
     private readonly NotifyIcon _notifyIcon;
     private readonly System.Windows.Forms.Timer _timer;
-    private readonly ToolStripMenuItem _statusItem;
-    private readonly ToolStripMenuItem _lastCheckItem;
+    private readonly ToolStripMenuItem _refreshItem;
     private readonly ToolStripMenuItem _intervalItem;
     private readonly ToolStripMenuItem _notificationsItem;
     private readonly ToolStripMenuItem _startupItem;
@@ -33,16 +32,14 @@ internal sealed class TrayApplicationContext : ApplicationContext
         _statusClient = new StatusClient(_httpClient);
         _updateService = new UpdateService(_httpClient, GetCurrentVersion());
 
-        _statusItem = new ToolStripMenuItem("Estado: ?") { Enabled = false };
-        _lastCheckItem = new ToolStripMenuItem("Última comprobación: pendiente") { Enabled = false };
         var versionItem = new ToolStripMenuItem($"Versión: {GetCurrentVersion().ToString(3)}") { Enabled = false };
-        var refreshItem = new ToolStripMenuItem("Comprobar estado ahora");
+        _refreshItem = new ToolStripMenuItem("Comprobar ahora");
         _intervalItem = new ToolStripMenuItem();
         _notificationsItem = new ToolStripMenuItem("Mostrar notificaciones") { CheckOnClick = true };
         _startupItem = new ToolStripMenuItem("Iniciar con Windows") { CheckOnClick = true };
         var exitItem = new ToolStripMenuItem("Salir");
 
-        refreshItem.Click += async (_, _) => await RefreshStatusAsync();
+        _refreshItem.Click += async (_, _) => await RefreshStatusAsync();
         _intervalItem.Click += (_, _) => ChangeInterval();
         _notificationsItem.Click += (_, _) => ToggleNotifications();
         _startupItem.Click += (_, _) => ToggleStartup();
@@ -54,11 +51,9 @@ internal sealed class TrayApplicationContext : ApplicationContext
 
         var menu = new ContextMenuStrip();
         menu.Items.AddRange([
-            _statusItem,
-            _lastCheckItem,
             versionItem,
             new ToolStripSeparator(),
-            refreshItem,
+            _refreshItem,
             _intervalItem,
             _notificationsItem,
             _startupItem,
@@ -139,10 +134,7 @@ internal sealed class TrayApplicationContext : ApplicationContext
 
         var stateText = StateText(status.State);
         _notifyIcon.Icon = StateIcon(status.State);
-        _statusItem.Text = status.IpCount is int count
-            ? $"Estado: {stateText} ({count} IP)"
-            : $"Estado: {stateText}";
-        _lastCheckItem.Text = $"Última comprobación: {DateTime.Now:G}";
+        _refreshItem.Text = $"Comprobar ahora ({DateTime.Now:HH:mm})";
         _notifyIcon.Text = Shorten(
             status.Error is null
                 ? $"Tebloqueo: {stateText} - {status.IpCount} IP"
@@ -239,7 +231,7 @@ internal sealed class TrayApplicationContext : ApplicationContext
     }
 
     private void UpdateIntervalMenuText() =>
-        _intervalItem.Text = $"Cambiar intervalo... ({_settings.IntervalMinutes} min)";
+        _intervalItem.Text = $"Cambiar intervalo ({_settings.IntervalMinutes} min)";
 
     private void ShowBalloon(string title, string text, ToolTipIcon icon) =>
         _notifyIcon.ShowBalloonTip(5_000, title, text, icon);

@@ -33,8 +33,7 @@ dotnet publish src/Tebloqueo/Tebloqueo.csproj -c Release -o publish
 - `src/Tebloqueo`: aplicación WinForms y autoactualizador.
 - `tests/Tebloqueo.Tests`: pruebas automatizadas.
 - `web`: placeholder de la futura web de descarga.
-- `.github/workflows/release.yml`: prueba, versiona y publica el EXE en cada push a `main`.
+- `.github/workflows/app.yml`: valida ramas y pull requests; en `main`, versiona y publica el EXE.
 - `.github/workflows/pages.yml`: despliega los cambios de `web` en GitHub Pages.
-- `.github/workflows/ci.yml`: valida ramas y pull requests.
 
 Las versiones publicadas usan el formato `1.0.n`, donde `n` corresponde al número de ejecución del workflow de release.
