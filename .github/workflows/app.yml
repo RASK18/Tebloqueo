@@ -12,7 +12,6 @@ on:
       - src/**
       - tests/**
       - Tebloqueo.slnx
-      - .github/workflows/app.yml
   workflow_dispatch:
 
 permissions:
@@ -59,8 +58,12 @@ jobs:
           }
 
           if (-not $shouldRelease) {
-            git diff --quiet $env:BEFORE_SHA $env:GITHUB_SHA -- src Tebloqueo.slnx
-            $shouldRelease = $LASTEXITCODE -eq 1
+            $changedAppFiles = @(git diff --name-only $env:BEFORE_SHA $env:GITHUB_SHA -- src Tebloqueo.slnx)
+            if ($LASTEXITCODE -ne 0) {
+              throw "No se pudieron determinar los cambios de la aplicación."
+            }
+
+            $shouldRelease = $changedAppFiles.Count -gt 0
           }
 
           "should_release=$($shouldRelease.ToString().ToLowerInvariant())" >> $env:GITHUB_OUTPUT
