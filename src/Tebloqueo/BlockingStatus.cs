@@ -11,6 +11,8 @@ internal enum BlockingState
 
 internal sealed record BlockingStatus(BlockingState State, int? IpCount, string? Error = null)
 {
+    internal const int BlockingThreshold = 10;
+
     public static BlockingStatus FromContent(string content)
     {
         var count = 0;
@@ -31,7 +33,7 @@ internal sealed record BlockingStatus(BlockingState State, int? IpCount, string?
             count++;
         }
 
-        return new BlockingStatus(count > 2 ? BlockingState.Yes : BlockingState.No, count);
+        return new BlockingStatus(count > BlockingThreshold ? BlockingState.Yes : BlockingState.No, count);
     }
 
     public static BlockingStatus FromError(Exception exception) =>

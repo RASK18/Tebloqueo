@@ -6,7 +6,7 @@ public sealed class BlockingStatusTests
     [InlineData("", 1, 0)]
     [InlineData("1.1.1.1", 1, 1)]
     [InlineData("1.1.1.1\n2.2.2.2", 1, 2)]
-    [InlineData("1.1.1.1\n2.2.2.2\n2001:db8::1", 2, 3)]
+    [InlineData("1.1.1.1\n2.2.2.2\n2001:db8::1", 1, 3)]
     public void FromContentCountsValidAddresses(string content, int expectedState, int expectedCount)
     {
         var result = BlockingStatus.FromContent(content);
@@ -14,6 +14,19 @@ public sealed class BlockingStatusTests
         Assert.Equal((BlockingState)expectedState, result.State);
         Assert.Equal(expectedCount, result.IpCount);
         Assert.Null(result.Error);
+    }
+
+    [Theory]
+    [InlineData(10, 1)]
+    [InlineData(11, 2)]
+    public void FromContentChangesStateAboveThreshold(int count, int expectedState)
+    {
+        var content = string.Join('\n', Enumerable.Range(1, count).Select(index => $"192.0.2.{index}"));
+
+        var result = BlockingStatus.FromContent(content);
+
+        Assert.Equal((BlockingState)expectedState, result.State);
+        Assert.Equal(count, result.IpCount);
     }
 
     [Fact]
