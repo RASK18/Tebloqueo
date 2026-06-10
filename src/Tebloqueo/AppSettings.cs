@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Tebloqueo;
 
@@ -10,14 +11,25 @@ internal sealed class AppSettings
 
     public int IntervalMinutes { get; set; } = DefaultIntervalMinutes;
     public bool NotificationsEnabled { get; set; } = true;
+    public Isp SelectedIsp { get; set; } = Isp.Todos;
 
-    public void Normalize() =>
+    public void Normalize()
+    {
         IntervalMinutes = Math.Clamp(IntervalMinutes, MinimumIntervalMinutes, MaximumIntervalMinutes);
+        if (!Enum.IsDefined(SelectedIsp))
+        {
+            SelectedIsp = Isp.Todos;
+        }
+    }
 }
 
 internal sealed class SettingsStore
 {
-    private static readonly JsonSerializerOptions SerializerOptions = new() { WriteIndented = true };
+    private static readonly JsonSerializerOptions SerializerOptions = new()
+    {
+        WriteIndented = true,
+        Converters = { new JsonStringEnumConverter() }
+    };
 
     public string SettingsPath { get; } = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),

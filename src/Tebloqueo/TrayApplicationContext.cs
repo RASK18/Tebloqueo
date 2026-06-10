@@ -14,6 +14,8 @@ internal sealed class TrayApplicationContext : ApplicationContext
     private readonly System.Windows.Forms.Timer _timer;
     private readonly ToolStripMenuItem _refreshItem;
     private readonly ToolStripMenuItem _intervalItem;
+    private readonly ToolStripMenuItem _ispItem;
+    private readonly Dictionary<Isp, ToolStripMenuItem> _ispItems;
     private readonly ToolStripMenuItem _notificationsItem;
     private readonly ToolStripMenuItem _startupItem;
     private readonly Icon _yesIcon = IconFactory.Create("SI", Color.FromArgb(196, 36, 36));
@@ -37,12 +39,21 @@ internal sealed class TrayApplicationContext : ApplicationContext
         var versionItem = new ToolStripMenuItem($"Versión: {GetCurrentVersion().ToString(3)}") { Enabled = false };
         _refreshItem = new ToolStripMenuItem("Comprobar ahora");
         _intervalItem = new ToolStripMenuItem();
+        _ispItem = new ToolStripMenuItem();
+        _ispItems = IspCatalog.All.ToDictionary(
+            isp => isp,
+            isp => new ToolStripMenuItem(IspCatalog.DisplayName(isp)));
         _notificationsItem = new ToolStripMenuItem("Mostrar notificaciones") { CheckOnClick = true };
         _startupItem = new ToolStripMenuItem("Iniciar con Windows") { CheckOnClick = true };
         var exitItem = new ToolStripMenuItem("Salir");
 
         _refreshItem.Click += async (_, _) => await RefreshStatusAsync();
         _intervalItem.Click += (_, _) => ChangeInterval();
+        foreach (var (isp, item) in _ispItems)
+        {
+            item.Click += async (_, _) => await ChangeIspAsync(isp);
+        }
+
         _notificationsItem.Click += (_, _) => ToggleNotifications();
         _startupItem.Click += (_, _) => ToggleStartup();
         exitItem.Click += (_, _) => ExitThread();
@@ -50,6 +61,8 @@ internal sealed class TrayApplicationContext : ApplicationContext
         _notificationsItem.Checked = _settings.NotificationsEnabled;
         _startupItem.Checked = ReadStartupState();
         UpdateIntervalMenuText();
+        UpdateIspMenu();
+        _ispItem.DropDownItems.AddRange([.. _ispItems.Values]);
 
         var menu = new ContextMenuStrip();
         menu.Items.AddRange([
@@ -57,6 +70,7 @@ internal sealed class TrayApplicationContext : ApplicationContext
             new ToolStripSeparator(),
             _refreshItem,
             _intervalItem,
+            _ispItem,
             _notificationsItem,
             _startupItem,
             new ToolStripSeparator(),
@@ -125,7 +139,7 @@ internal sealed class TrayApplicationContext : ApplicationContext
         _isRefreshing = true;
         try
         {
-            var status = await _statusClient.CheckAsync();
+            var status = await _statusClient.CheckAsync(_settings.SelectedIsp);
             ApplyStatus(status);
         }
         finally
@@ -198,6 +212,26 @@ internal sealed class TrayApplicationContext : ApplicationContext
         }
     }
 
+    private async Task ChangeIspAsync(Isp isp)
+    {
+        if (_settings.SelectedIsp == isp)
+        {
+            return;
+        }
+
+        var previousIsp = _settings.SelectedIsp;
+        _settings.SelectedIsp = isp;
+        if (!TrySaveSettings())
+        {
+            _settings.SelectedIsp = previousIsp;
+            UpdateIspMenu();
+            return;
+        }
+
+        UpdateIspMenu();
+        await RefreshStatusAsync();
+    }
+
     private void ToggleStartup()
     {
         try
@@ -252,6 +286,15 @@ internal sealed class TrayApplicationContext : ApplicationContext
 
     private void UpdateIntervalMenuText() =>
         _intervalItem.Text = $"Cambiar intervalo ({_settings.IntervalMinutes} min)";
+
+    private void UpdateIspMenu()
+    {
+        _ispItem.Text = $"ISP ({IspCatalog.DisplayName(_settings.SelectedIsp)})";
+        foreach (var (isp, item) in _ispItems)
+        {
+            item.Checked = isp == _settings.SelectedIsp;
+        }
+    }
 
     private void ShowBalloon(string title, string text, ToolTipIcon icon) =>
         _notifyIcon.ShowBalloonTip(5_000, title, text, icon);

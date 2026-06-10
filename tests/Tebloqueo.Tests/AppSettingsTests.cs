@@ -14,4 +14,14 @@ public sealed class AppSettingsTests
 
         Assert.Equal(expected, settings.IntervalMinutes);
     }
+
+    [Fact]
+    public void NormalizeResetsUnknownIsp()
+    {
+        var settings = new AppSettings { SelectedIsp = (Isp)999 };
+
+        settings.Normalize();
+
+        Assert.Equal(Isp.Todos, settings.SelectedIsp);
+    }
 }
