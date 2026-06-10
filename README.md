@@ -36,4 +36,4 @@ dotnet publish src/Tebloqueo/Tebloqueo.csproj -c Release -o publish
 - `.github/workflows/app.yml`: valida ramas y pull requests; en `main`, versiona y publica el EXE.
 - `.github/workflows/pages.yml`: despliega los cambios de `web` en GitHub Pages.
 
-Las versiones publicadas usan el formato `1.0.n`, donde `n` corresponde al número de ejecución del workflow de release.
+Las versiones publicadas usan el formato `1.0.n`. El workflow consulta las releases existentes e incrementa automáticamente `n`.

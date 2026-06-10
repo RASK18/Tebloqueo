@@ -16,7 +16,6 @@ jobs:
   build-test-release:
     runs-on: windows-latest
     env:
-      VERSION: 1.0.${{ github.run_number }}
       GH_TOKEN: ${{ github.token }}
 
     steps:
@@ -33,6 +32,27 @@ jobs:
 
       - name: Test
         run: dotnet test Tebloqueo.slnx --configuration Release --no-restore
+
+      - name: Determine next release version
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        shell: pwsh
+        run: |
+          $releases = gh api "repos/${{ github.repository }}/releases?per_page=100" | ConvertFrom-Json
+          $patchNumbers = @(
+            $releases | ForEach-Object {
+              if ($_.tag_name -match '^v1\.0\.(\d+)$') {
+                [int]$Matches[1]
+              }
+            }
+          )
+
+          $nextPatch = if ($patchNumbers.Count -eq 0) {
+            1
+          } else {
+            ($patchNumbers | Measure-Object -Maximum).Maximum + 1
+          }
+
+          "VERSION=1.0.$nextPatch" >> $env:GITHUB_ENV
 
       - name: Publish single-file executable
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
