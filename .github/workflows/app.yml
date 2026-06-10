@@ -2,7 +2,17 @@ name: Windows app
 
 on:
   pull_request:
+    paths:
+      - src/**
+      - tests/**
+      - Tebloqueo.slnx
+      - .github/workflows/app.yml
   push:
+    paths:
+      - src/**
+      - tests/**
+      - Tebloqueo.slnx
+      - .github/workflows/app.yml
   workflow_dispatch:
 
 permissions:
@@ -21,6 +31,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
@@ -33,8 +45,28 @@ jobs:
       - name: Test
         run: dotnet test Tebloqueo.slnx --configuration Release --no-restore
 
-      - name: Determine next release version
+      - name: Determine whether to publish a release
+        id: release_check
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        shell: pwsh
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+        run: |
+          $shouldRelease = "${{ github.event_name }}" -eq "workflow_dispatch"
+
+          if (-not $shouldRelease -and $env:BEFORE_SHA -match '^0+$') {
+            $shouldRelease = $true
+          }
+
+          if (-not $shouldRelease) {
+            git diff --quiet $env:BEFORE_SHA $env:GITHUB_SHA -- src Tebloqueo.slnx
+            $shouldRelease = $LASTEXITCODE -eq 1
+          }
+
+          "should_release=$($shouldRelease.ToString().ToLowerInvariant())" >> $env:GITHUB_OUTPUT
+
+      - name: Determine next release version
+        if: steps.release_check.outputs.should_release == 'true'
         shell: pwsh
         run: |
           $releases = gh api "repos/${{ github.repository }}/releases?per_page=100" | ConvertFrom-Json
@@ -55,7 +87,7 @@ jobs:
           "VERSION=1.0.$nextPatch" >> $env:GITHUB_ENV
 
       - name: Publish single-file executable
-        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        if: steps.release_check.outputs.should_release == 'true'
         shell: pwsh
         run: >
           dotnet publish src/Tebloqueo/Tebloqueo.csproj
@@ -67,7 +99,7 @@ jobs:
           -p:DebugSymbols=false
 
       - name: Create update manifest
-        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        if: steps.release_check.outputs.should_release == 'true'
         shell: pwsh
         run: |
           $executable = Join-Path $PWD "publish/Tebloqueo.exe"
@@ -80,7 +112,7 @@ jobs:
           $manifest | ConvertTo-Json | Set-Content "publish/update.json" -Encoding utf8
 
       - name: Create or update GitHub release
-        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        if: steps.release_check.outputs.should_release == 'true'
         shell: pwsh
         run: |
           $tag = "v$env:VERSION"
