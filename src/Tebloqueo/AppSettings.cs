@@ -31,10 +31,15 @@ internal sealed class SettingsStore
         Converters = { new JsonStringEnumConverter() }
     };
 
-    public string SettingsPath { get; } = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-        "Tebloqueo",
-        "settings.json");
+    public string SettingsPath { get; }
+
+    public SettingsStore(string? settingsPath = null)
+    {
+        SettingsPath = settingsPath ?? Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "Tebloqueo",
+            "settings.json");
+    }
 
     public AppSettings Load()
     {
@@ -45,7 +50,9 @@ internal sealed class SettingsStore
                 return new AppSettings();
             }
 
-            var settings = JsonSerializer.Deserialize<AppSettings>(File.ReadAllText(SettingsPath)) ?? new AppSettings();
+            var settings = JsonSerializer.Deserialize<AppSettings>(
+                File.ReadAllText(SettingsPath),
+                SerializerOptions) ?? new AppSettings();
             settings.Normalize();
             return settings;
         }

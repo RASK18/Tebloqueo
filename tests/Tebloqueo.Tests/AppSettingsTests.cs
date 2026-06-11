@@ -24,4 +24,31 @@ public sealed class AppSettingsTests
 
         Assert.Equal(Isp.Todos, settings.SelectedIsp);
     }
+
+    [Fact]
+    public void SaveAndLoadPreservesAllSettings()
+    {
+        var directory = Path.Combine(Path.GetTempPath(), "Tebloqueo.Tests", Guid.NewGuid().ToString());
+        var store = new SettingsStore(Path.Combine(directory, "settings.json"));
+
+        try
+        {
+            store.Save(new AppSettings
+            {
+                IntervalMinutes = 10,
+                NotificationsEnabled = false,
+                SelectedIsp = Isp.Orange
+            });
+
+            var settings = store.Load();
+
+            Assert.Equal(10, settings.IntervalMinutes);
+            Assert.False(settings.NotificationsEnabled);
+            Assert.Equal(Isp.Orange, settings.SelectedIsp);
+        }
+        finally
+        {
+            Directory.Delete(directory, true);
+        }
+    }
 }
